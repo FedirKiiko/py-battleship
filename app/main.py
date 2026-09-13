@@ -10,20 +10,31 @@ class Ship:
         self.start = start
         self.end = end
         self.is_drowned = is_drowned
-        row_start, col_start = start
-        row_end, col_end = end
-        col_start, col_end = min(col_start, col_end), max(col_start, col_end)
-        row_start, row_end = min(row_start, row_end), max(row_start, row_end)
-        if row_start == row_end:
-            self.decks = [
-                Deck(row_start, i)
-                for i in range(col_start, col_end + 1)
-            ]
-        else:
-            self.decks = [
-                Deck(i, col_start)
-                for i in range(row_start, row_end + 1)
-            ]
+
+    @property
+    def decks(self) -> list:
+        if not hasattr(self, "_decks"):
+            row_start, col_start = self.start
+            row_end, col_end = self.end
+            col_start, col_end = (
+                min(col_start, col_end),
+                max(col_start, col_end)
+            )
+            row_start, row_end = (
+                min(row_start, row_end),
+                max(row_start, row_end)
+            )
+            if row_start == row_end:
+                self._decks = [
+                    Deck(row_start, i)
+                    for i in range(col_start, col_end + 1)
+                ]
+            else:
+                self._decks = [
+                    Deck(i, col_start)
+                    for i in range(row_start, row_end + 1)
+                ]
+        return self._decks
 
     def get_deck(self, row: int, column: int) -> Deck | None:
         for deck in self.decks:
@@ -51,14 +62,10 @@ class Battleship:
             for deck in ship.decks:
                 self.field[(deck.row, deck.column)] = ship
 
-    # def _validate_field(self):
-    #     pass
-
     def fire(self, location: tuple) -> str:
         if location in self.field:
             return self.field[location].fire(location[0], location[1])
-        else:
-            return "Miss!"
+        return "Miss!"
 
     def print_field(self) -> None:
         for row in range(10):
